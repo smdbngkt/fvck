@@ -47,7 +47,7 @@ display_ascii() {
 
 # Function to get IP address
 get_ip_address() {
-    ip_address=$(hostname -I | awk '{print $1}')
+    ip_address=$(curl -s https://api.ipify.org)
     if [[ -z "$ip_address" ]]; then
         echo -ne "${YELLOW}Unable to determine IP address automatically.${RESET}"
         echo -ne "${YELLOW} Please enter the IP address:${RESET} "
@@ -102,7 +102,7 @@ install_node() {
 
     # Install Docker Compose if not installed
     if ! command -v docker-compose &> /dev/null; then
-        sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" \
+        sudo curl -L "https://github.com/docker/compose/releases/download/v2.31.0/docker-compose-$(uname -s)-$(uname -m)" \
         -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
     fi
@@ -130,7 +130,7 @@ install_node() {
     read num_nodes
 
     # Get IP address
-    ip_address=$(hostname -I | awk '{print $1}')
+    ip_address=$(curl -s https://api.ipify.org)
     if [[ -z "$ip_address" ]]; then
         echo -ne "${YELLOW}Unable to determine IP address automatically.${RESET}"
         echo -ne "${YELLOW} Please enter the IP address:${RESET} "
@@ -192,7 +192,7 @@ start_node() {
     read num_nodes
 
     # Get IP address
-    ip_address=$(hostname -I | awk '{print $1}')
+    ip_address=$(curl -s https://api.ipify.org)
     if [[ -z "$ip_address" ]]; then
         echo -ne "${YELLOW}Unable to determine IP address automatically.${RESET}"
         echo -ne "${YELLOW} Please enter the IP address:${RESET} "
@@ -204,7 +204,7 @@ start_node() {
         docker-compose -f docker-compose$i.yaml up -d
     done
     
-    ip_address=$(hostname -I | awk '{print $1}')
+    ip_address=$(curl -s https://api.ipify.org)
     if [[ -z "$ip_address" ]]; then
         echo -ne "${YELLOW}Unable to determine IP address automatically.${RESET}"
         echo -ne "${YELLOW} Please enter the IP address:${RESET} "
