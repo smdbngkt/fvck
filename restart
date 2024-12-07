@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Menambahkan perintah ke crontab untuk merestart semua container Docker setiap 8 jam
+(crontab -l 2>/dev/null; echo "0 */8 * * * docker restart \$(docker ps -q)") | crontab -
+
+echo "Tugas crontab telah berhasil ditambahkan untuk merestart semua container Docker setiap 8 jam."
