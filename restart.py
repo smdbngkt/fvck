@@ -28,6 +28,25 @@ console_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(console_handler)
 
+        
+def send_telegram_alert(message):
+    bot_token = "7362058824:AAHH46xiyHveSleOATdImGPltdD5gc_6lhk"
+    chat_id = "450810319"
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
+
+    
+    try:
+        response = requests.post(url, data=payload)
+        if response.status_code == 200:
+            print("Alert sent successfully.")
+        else:
+            print(f"Failed to send alert. Status code: {response.status_code}")
+            print(response.text)
+    except Exception as e:
+        print(f"Error occurred: {e}")
+
+
 def format_timestamp_to_gmt7(timestamp):
     date = datetime.fromtimestamp(timestamp / 1000)
     date_gmt7 = date + timedelta(hours=7)
@@ -77,6 +96,14 @@ def fetch_and_save_nodes(filename="nodes_data.json"):
     nodes = fetch_nodes()
     if not nodes:
         logger.warning("No available nodes to save.")
+        # Mengirimkan notifikasi ke Telegram jika tidak ada nodes
+        message = (
+            f"🚨 **OCEAN NODE ALERT** 🚨\n\n"
+            f"🌐 **IP Address:** `{ip_address}`\n"
+            f"❌ **No nodes found for this IP in the API response.**\n"
+            f"💡 **Ensure the IP is registered or check the API response.**"
+        )
+        send_telegram_alert(message)
         return
 
     # Load existing data if the file exists
@@ -93,19 +120,16 @@ def fetch_and_save_nodes(filename="nodes_data.json"):
         previous_node = existing_nodes.get(node_id)
         if previous_node and previous_node['_source']['lastCheck'] == node['_source']['lastCheck']:
             logger.info(f"Node {node_id} 'lastCheck' has not changed. Keeping previous 'restarted' status.")
-            # Keep previous 'restarted' status if 'lastCheck' hasn't changed
-            previous_node
             node['_source']['restarted'] = previous_node['_source'].get('restarted', False)
         else:
-            # Reset 'restarted' to False if 'lastCheck' has changed or node is new
             logger.info(f"Node {node_id} 'lastCheck' has changed. Resetting 'restarted' to False.")
             node['_source']['restarted'] = False
-
 
     # Save updated nodes data to JSON file
     with open(filename, 'w') as f:
         json.dump({"nodes": nodes}, f, indent=4)
     logger.info(f"Fetched data saved to {filename} with selective 'restarted' updates.")
+
 
 
 # Function to update the 'restarted' field to True for a specific node after restart
@@ -197,23 +221,6 @@ def execute_docker_compose(port, cwd):
     except Exception as err:
         logger.error(f"Unexpected error executing command\nError: {err}")
         return False
-        
-def send_telegram_alert(message):
-    bot_token = "7362058824:AAHH46xiyHveSleOATdImGPltdD5gc_6lhk"
-    chat_id = "450810319"
-    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
-
-    
-    try:
-        response = requests.post(url, data=payload)
-        if response.status_code == 200:
-            print("Alert sent successfully.")
-        else:
-            print(f"Failed to send alert. Status code: {response.status_code}")
-            print(response.text)
-    except Exception as e:
-        print(f"Error occurred: {e}")
 
 
 def main():
