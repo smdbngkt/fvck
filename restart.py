@@ -202,10 +202,8 @@ def send_telegram_alert(message):
     bot_token = "7362058824:AAHH46xiyHveSleOATdImGPltdD5gc_6lhk"
     chat_id = "450810319"
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": message
-    }
+    payload = {"chat_id": chat_id, "text": message, "parse_mode": "Markdown"}
+
     
     try:
         response = requests.post(url, data=payload)
