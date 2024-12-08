@@ -270,7 +270,15 @@ def main():
     # Send alert and finish script
     nodeData = [node for node in nodes_data["nodes"] if node["_source"]["ipAndDns"]["port"] in ports]
     error_message = "\n".join(f"» Port {node['_source']['ipAndDns']['port']} - {node['_source']['eligibilityCauseStr']}" for node in nodeData)
-    send_telegram_alert(f"OCEAN NODE\n\nFound {len(ports)} Nodes InEligible! Restarting... \n{error_message}")
+    message = (
+    f"🚨 **OCEAN NODE ALERT** 🚨\n\n"
+    f"🌐 **IP Address:** `{ip_address}`\n"
+    f"❌ **Found {len(ports)} Nodes Ineligible!**\n"
+    f"🔄 **Action:** Restarting...\n\n"
+    f"🛠 **Details:** {error_message}\n"
+    f"📅 **Timestamp:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    )
+    send_telegram_alert(message)
     logger.info("=== Script execution finished ===")
 
 if __name__ == "__main__":
