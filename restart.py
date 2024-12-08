@@ -6,30 +6,12 @@ import os
 import sys
 from datetime import datetime, timedelta
 
-def get_ip_from_curl():
-    """
-    Fungsi untuk mendapatkan IP publik menggunakan curl.
-    """
-    try:
-        # Jalankan perintah curl untuk mendapatkan IP publik
-        result = subprocess.run(["curl", "-s", "https://api.ipify.org"], capture_output=True, text=True, check=True)
-        ip = result.stdout.strip()
-        if not ip:
-            raise ValueError("Gagal mendapatkan IP dari curl")
-        return ip
-    except subprocess.CalledProcessError as cpe:
-        print(f"Error menjalankan curl: {cpe.stderr.strip()}")
-        sys.exit(1)
-    except Exception as err:
-        print(f"Kesalahan tidak terduga saat mengambil IP: {err}")
-        sys.exit(1)
+if len(sys.argv) != 3:
+    print("Usage: python3 req.py <IP_ADDRESS> <WORKING_DIRECTORY>")
+    sys.exit(1)
 
-if len(sys.argv) < 3:
-    ip_address = get_ip_from_curl()
-    working_directory = sys.argv[1] if len(sys.argv) == 2 else os.getcwd()
-else:
-    ip_address = sys.argv[1]
-    working_directory = sys.argv[2]
+ip_address = sys.argv[1]
+working_directory = sys.argv[2]
 
 logger = logging.getLogger('DockerRestartLogger')
 logger.setLevel(logging.INFO)
