@@ -273,8 +273,8 @@ def main():
     f"🌐 **IP Address:** `{ip_address}`\n"
     f"❌ **Found {len(ports)} Nodes Ineligible!**\n"
     f"🔄 **Action:** Restarting...\n\n"
-    f"🛠 **Details:** {error_message}\n"
-    f"📅 **Timestamp:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    f"🛠  {error_message}\n"
+    f"📅 {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
     )
     send_telegram_alert(message)
     logger.info("=== Script execution finished ===")
