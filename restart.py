@@ -59,7 +59,7 @@ def fetch_nodes():
         data = response.json()
         nodes = data.get('nodes', [])
         nodes = [node for node in nodes if node['_source']['uptime'] > 0]
-        nodes = [node for node in nodes if 3001 <= node['_source']['ipAndDns']['port'] <= 3005] # and node['_source']['ipAndDns']['port'] != 3008]
+        nodes = [node for node in nodes if 3001 <= node['_source']['ipAndDns']['port'] <= 3020] # and node['_source']['ipAndDns']['port'] != 3008]
         logger.info(f"Retrieved {len(nodes)} nodes from API.")
         return nodes
     except requests.exceptions.HTTPError as http_err:
@@ -149,7 +149,7 @@ def execute_docker_compose(port, cwd):
         command = ["docker", "restart", "ocean-node"]
         node_info = "ocean-node"
     # else if port greater than 3008 skipped
-    elif port > 3005: # or port == 3008:
+    elif port > 3020: # or port == 3008:
         # logger.warning(f"Port {port} is greater than 3008. Skipping.")
         return False
     else:
