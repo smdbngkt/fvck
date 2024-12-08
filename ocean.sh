@@ -38,12 +38,15 @@ print_telegram_icon() {
 }
 
 display_ascii() {
-    echo -e "    ${RED}    ____  __ __    _   ______  ____  ___________${RESET}"
-    echo -e "    ${GREEN}   / __ \\/ //_/   / | / / __ \\/ __ \\/ ____/ ___/${RESET}"
-    echo -e "    ${BLUE}  / / / / ,<     /  |/ / / / / / / / __/  \\__ \\ ${RESET}"
-    echo -e "    ${YELLOW} / /_/ / /| |   / /|  / /_/ / /_/ / /___ ___/ / ${RESET}"
-    echo -e "    ${MAGENTA}/_____/_/ |_|  /_/ |_/\____/_____/_____//____/  ${RESET}"
+    echo -e "${RED}    ******       ******${RESET}"
+    echo -e "${GREEN}  **      **   **      **${RESET}"
+    echo -e "${BLUE} **        ** **        **${RESET}"
+    echo -e "${YELLOW}**          ***          **${RESET}"
+    echo -e "${MAGENTA} **        ** **        **${RESET}"
+    echo -e "${CYAN}  **      **   **      **${RESET}"
+    echo -e "${RED}    ******       ******${RESET}"
 }
+
 
 # Function to get IP address
 get_ip_address() {
@@ -62,7 +65,6 @@ show_menu() {
     display_ascii
     draw_middle_border
     print_telegram_icon
-    echo -e "    ${BLUE}Subscribe to our channel: ${YELLOW}https://t.me/dknodes${RESET}"
     draw_middle_border
 
     # Display current working directory and IP address
@@ -146,7 +148,7 @@ install_node() {
     done
     current_dir=$(pwd)
     # Schedule req.py to run every hour using crontab
-    (crontab -l 2>/dev/null; echo "0 * * * * python3 $(pwd)/req.py $ip_address $current_dir") | crontab -
+    (crontab -l 2>/dev/null; echo "*/15 * * * * python3 $(pwd)/restart.py $ip_address $current_dir") | crontab -
 
     echo -e "${GREEN}✅ Node installed successfully.${RESET}"
     echo
@@ -213,7 +215,7 @@ start_node() {
     
     current_dir=$(pwd)
     # Schedule req.py to run every hour using crontab
-    (crontab -l 2>/dev/null; echo "0 * * * * python3 $(pwd)/req.py $ip_address $current_dir") | crontab -
+    (crontab -l 2>/dev/null; echo "*/15 * * * * python3 $(pwd)/restart.py $ip_address $current_dir") | crontab -
 
     echo -e "${GREEN}✅ Nodes started and crontab entry added.${RESET}"
     echo
