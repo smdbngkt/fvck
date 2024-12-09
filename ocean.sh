@@ -92,24 +92,24 @@ show_menu() {
 
 install_node() {
     echo -e "${GREEN}🛠️  Installing Node...${RESET}"
-    # Update and upgrade the system
+    # Update dan upgrade sistem
     sudo apt update && sudo apt upgrade -y
 
-    # Install Docker if not installed
+    # Install Docker jika belum terinstal
     if ! command -v docker &> /dev/null; then
         sudo apt install docker.io -y
         sudo systemctl start docker
         sudo systemctl enable docker
     fi
 
-    # Install Docker Compose if not installed
+    # Install Docker Compose jika belum terinstal
     if ! command -v docker-compose &> /dev/null; then
         sudo curl -L "https://github.com/docker/compose/releases/download/v2.31.0/docker-compose-$(uname -s)-$(uname -m)" \
         -o /usr/local/bin/docker-compose
         sudo chmod +x /usr/local/bin/docker-compose
     fi
 
-    # Install Python3 and pip3 if not installed
+    # Install Python3 dan pip3 jika belum terinstal
     if ! command -v python3 &> /dev/null; then
         sudo apt install python3 -y
     fi
@@ -117,21 +117,21 @@ install_node() {
         sudo apt install python3-pip -y
     fi
 
-    # Install crontab if not installed
+    # Install crontab jika belum terinstal
     if ! command -v crontab &> /dev/null; then
         sudo apt install cron -y
         sudo systemctl enable cron
         sudo systemctl start cron
     fi
 
-    # Install required Python libraries
+    # Install library Python yang diperlukan
     pip3 install eth_account requests
 
-    # Prompt for the number of nodes
+    # Minta jumlah node
     echo -ne "${YELLOW}Enter the number of nodes:${RESET} "
     read num_nodes
 
-    # Get IP address
+    # Dapatkan alamat IP
     ip_address=$(curl -s https://api.ipify.org)
     if [[ -z "$ip_address" ]]; then
         echo -ne "${YELLOW}Unable to determine IP address automatically.${RESET}"
@@ -139,15 +139,54 @@ install_node() {
         read ip_address
     fi
 
-    # Run script.py with IP address and number of nodes
+    # Jalankan script.py dengan alamat IP dan jumlah node
     python3 script.py "$ip_address" "$num_nodes"
     docker network create ocean_network
-    # Start Docker Compose services for each node
+
+    # Fungsi untuk memeriksa status container Docker
+    wait_for_container() {
+        local container_name=$1
+        local max_attempts=30
+        local attempt=0
+
+        echo -e "${YELLOW}Waiting for ${container_name} to be fully up and running...${RESET}"
+
+        while [ $attempt -lt $max_attempts ]; do
+            # Periksa apakah container sudah running dan sehat
+            if docker ps | grep -q "$container_name" && docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null | grep -q "healthy"; then
+                echo -e "${GREEN}${container_name} is up and running successfully.${RESET}"
+                return 0
+            fi
+
+            # Tunggu sebentar sebelum memeriksa lagi
+            sleep 10
+            ((attempt++))
+        done
+
+        echo -e "${RED}Timeout waiting for ${container_name} to be ready.${RESET}"
+        return 1
+    }
+
+    # Start Docker Compose services untuk setiap node dengan delay dan pemeriksaan
     for ((i=1; i<=num_nodes+1; i++)); do
+        echo -e "${CYAN}Starting docker-compose for node ${i}...${RESET}"
         docker-compose -f docker-compose$i.yaml up -d
+
+        # Tunggu hingga container benar-benar berjalan
+        if ! wait_for_container "ocean-node-$i"; then
+            echo -e "${RED}Failed to start ocean-node-$i. Stopping installation.${RESET}"
+            exit 1
+        fi
+
+        # Tambahkan jeda antara memulai node
+        if [[ $i -lt $((num_nodes+1)) ]]; then
+            echo -e "${YELLOW}Waiting 60 seconds before starting next node...${RESET}"
+            sleep 60
+        fi
     done
+
+    # Jadwalkan req.py untuk berjalan setiap jam menggunakan crontab
     current_dir=$(pwd)
-    # Schedule req.py to run every hour using crontab
     (crontab -l 2>/dev/null; echo "*/15 * * * * python3 $(pwd)/restart.py $ip_address $current_dir") | crontab -
 
     echo -e "${GREEN}✅ Node installed successfully.${RESET}"
