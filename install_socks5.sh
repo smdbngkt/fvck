@@ -33,6 +33,12 @@ pass {
 }
 EOL
 
+# Periksa dan aktifkan UFW untuk port 1080 jika belum diizinkan
+if ! ufw status | grep -qw "1080"; then
+    ufw allow 1080/tcp
+    echo "Port 1080 telah diizinkan melalui UFW."
+fi
+
 # Restart dan aktifkan Dante Server
 systemctl restart danted
 systemctl enable danted
